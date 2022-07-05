@@ -33,6 +33,15 @@ export class RedirectsMiddleware {
     this.locales = config.locales;
   }
 
+  private excludeRoute(pathname: string) {
+    if (
+      pathname.startsWith('/_next') // Ignore next service calls
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Gets the Next.js API route handler
    * @returns route handler
@@ -42,6 +51,9 @@ export class RedirectsMiddleware {
   }
 
   private handler = async (req: NextRequest): Promise<NextResponse> => {
+    if (this.excludeRoute(req.nextUrl.pathname))
+      return NextResponse.next();
+
     // Find the redirect from result of RedirectService
     const existsRedirect = await this.getExistsRedirect(req);
 
